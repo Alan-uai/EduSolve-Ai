@@ -44,26 +44,6 @@ export function ProblemForm() {
     }
   };
 
-  const textToSvgDataUri = (text: string) => {
-    const sanitizedText = text
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&apos;');
-
-    const svgString = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="600" height="300" viewBox="0 0 600 300">
-        <rect width="100%" height="100%" fill="#F5F5F5"/>
-        <text x="20" y="40" font-family="PT Sans, sans-serif" font-size="16px" fill="black">
-          ${sanitizedText.split('\n').map(line => `<tspan x="20" dy="1.2em">${line}</tspan>`).join('')}
-        </text>
-      </svg>
-    `;
-    const base64 = btoa(unescape(encodeURIComponent(svgString)));
-    return `data:image/svg+xml;base64,${base64}`;
-  };
-
   const fileToDataUri = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -73,31 +53,32 @@ export function ProblemForm() {
     });
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     setState({}); // Clear previous state
-    let dataUri = "";
 
-    try {
+    startTransition(async () => {
+      let result;
       if (activeTab === "scan") {
         if (!imageFile) {
           toast({ variant: "destructive", title: "No image selected", description: "Please upload an image of the problem." });
           return;
         }
-        dataUri = await fileToDataUri(imageFile);
+        try {
+          const dataUri = await fileToDataUri(imageFile);
+          result = await generateSolution({ problemImage: dataUri });
+        } catch (error) {
+          toast({ variant: "destructive", title: "Error processing image", description: "Could not prepare the image for the AI." });
+          return;
+        }
       } else {
         if (!problemText.trim()) {
           toast({ variant: "destructive", title: "No text entered", description: "Please type the problem in the text area." });
           return;
         }
-        dataUri = textToSvgDataUri(problemText);
+        result = await generateSolution({ problemText: problemText });
       }
-    } catch (error) {
-       toast({ variant: "destructive", title: "Error processing input", description: "Could not prepare the problem for the AI." });
-       return;
-    }
 
-    startTransition(async () => {
-      const result = await generateSolution({ problemImage: dataUri });
       if (result.error) {
         toast({ variant: "destructive", title: "AI Error", description: result.error });
       }
@@ -120,7 +101,7 @@ export function ProblemForm() {
           <CardContent className="p-6">
             <form
               ref={formRef}
-              action={handleSubmit}
+              onSubmit={handleSubmit}
               className="flex flex-col gap-6"
             >
               <TabsContent value="scan" className="m-0">

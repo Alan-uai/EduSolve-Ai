@@ -13,9 +13,11 @@ import {z} from 'genkit';
 const ScanProblemAndGenerateSolutionInputSchema = z.object({
   problemImage: z
     .string()
+    .optional()
     .describe(
       "A photo of a math or science problem, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
     ),
+  problemText: z.string().optional().describe("A math or science problem, as a string of text."),
 });
 export type ScanProblemAndGenerateSolutionInput = z.infer<typeof ScanProblemAndGenerateSolutionInputSchema>;
 
@@ -32,9 +34,18 @@ const prompt = ai.definePrompt({
   name: 'scanProblemAndGenerateSolutionPrompt',
   input: {schema: ScanProblemAndGenerateSolutionInputSchema},
   output: {schema: ScanProblemAndGenerateSolutionOutputSchema},
-  prompt: `You are an expert math and science tutor. A student will provide you with an image of a problem. Extract the problem from the image and provide a detailed, step-by-step solution that the student can easily understand.
+  prompt: `You are an expert math and science tutor. A student will provide you with a problem, either as text or an image. Extract the problem and provide a detailed, step-by-step solution that the student can easily understand.
 
-Problem Image: {{media url=problemImage}}`,
+{{#if problemText}}
+Problem Text:
+{{problemText}}
+{{/if}}
+
+{{#if problemImage}}
+Problem Image:
+{{media url=problemImage}}
+{{/if}}
+`,
 });
 
 const scanProblemAndGenerateSolutionFlow = ai.defineFlow(

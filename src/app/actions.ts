@@ -12,7 +12,7 @@ export async function generateSolution(
   input: ScanProblemAndGenerateSolutionInput
 ): Promise<FormState> {
   try {
-    if (!input.problemImage) {
+    if (!input.problemImage && !input.problemText) {
       return { error: 'No problem provided. Please upload an image or type the problem text.' };
     }
 
