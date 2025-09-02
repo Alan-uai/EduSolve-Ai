@@ -9,7 +9,7 @@ export default function Home() {
           <div className="inline-flex items-center gap-3">
             <BrainCircuit className="h-10 w-10 text-primary" />
             <h1 className="text-4xl md:text-5xl font-bold font-headline text-foreground tracking-tight">
-              EduSolve AI
+              Castanha
             </h1>
           </div>
           <p className="text-muted-foreground mt-3 text-lg">
@@ -20,7 +20,7 @@ export default function Home() {
         <ProblemForm />
 
         <footer className="text-center mt-12 text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} EduSolve AI. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Castanha. All rights reserved.</p>
         </footer>
       </div>
     </main>
