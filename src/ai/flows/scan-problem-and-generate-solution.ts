@@ -11,11 +11,9 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const ScanProblemAndGenerateSolutionInputSchema = z.object({
-  problemImage: z
-    .string()
-    .optional()
+  problemImages: z.array(z.string()).optional()
     .describe(
-      "A photo of a math or science problem, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
+      "An array of photos of a math or science problem, as data URIs. Each must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
     ),
   problemText: z.string().optional().describe("A math or science problem, as a string of text."),
 });
@@ -34,16 +32,20 @@ const prompt = ai.definePrompt({
   name: 'scanProblemAndGenerateSolutionPrompt',
   input: {schema: ScanProblemAndGenerateSolutionInputSchema},
   output: {schema: ScanProblemAndGenerateSolutionOutputSchema},
-  prompt: `You are an expert math and science tutor. A student will provide you with a problem, either as text or an image. Your response must be in Portuguese, unless the question is about the subject of English. Extract the problem and provide a detailed, step-by-step solution that the student can easily understand.
+  prompt: `You are an expert math and science tutor. A student will provide you with a problem, either as text or one or more images. Your response must be in Portuguese, unless the question is about the subject of English. Extract the problem and provide a detailed, step-by-step solution that the student can easily understand.
+
+If multiple images are provided, they may represent different parts of the same problem. Please piece them together to form the complete problem before solving.
 
 {{#if problemText}}
 Problem Text:
 {{problemText}}
 {{/if}}
 
-{{#if problemImage}}
-Problem Image:
-{{media url=problemImage}}
+{{#if problemImages}}
+Problem Images:
+{{#each problemImages}}
+{{media url=this}}
+{{/each}}
 {{/if}}
 `,
 });

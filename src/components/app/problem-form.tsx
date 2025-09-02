@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useRef } from "react";
 import Image from "next/image";
-import { Camera, Type, LoaderCircle, WandSparkles } from "lucide-react";
+import { Camera, Type, LoaderCircle, WandSparkles, X } from "lucide-react";
 import { generateSolution } from "@/app/actions";
 import { cn } from "@/lib/utils";
 
@@ -26,31 +26,58 @@ export function ProblemForm() {
   const [state, setState] = useState<State>({});
   const [activeTab, setActiveTab] = useState("scan");
 
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [problemText, setProblemText] = useState("");
 
   const formRef = useRef<HTMLFormElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+    const files = Array.from(event.target.files || []);
+    if (files.length > 0) {
+      const newFiles = [...imageFiles, ...files];
+      setImageFiles(newFiles);
+
+      const newPreviews = [...imagePreviews];
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          newPreviews.push(reader.result as string);
+          // Update previews after each file is read
+          setImagePreviews([...newPreviews]);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  };
+  
+  const removeImage = (index: number) => {
+    const newFiles = [...imageFiles];
+    newFiles.splice(index, 1);
+    setImageFiles(newFiles);
+
+    const newPreviews = [...imagePreviews];
+    newPreviews.splice(index, 1);
+    setImagePreviews(newPreviews);
+
+    // Reset file input value to allow re-uploading the same file
+    if (inputRef.current) {
+      inputRef.current.value = "";
     }
   };
 
-  const fileToDataUri = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
+
+  const filesToDataUris = (files: File[]): Promise<string[]> => {
+    const promises = files.map(file => {
+      return new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
     });
+    return Promise.all(promises);
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -60,15 +87,15 @@ export function ProblemForm() {
     startTransition(async () => {
       let result;
       if (activeTab === "scan") {
-        if (!imageFile) {
-          toast({ variant: "destructive", title: "No image selected", description: "Please upload an image of the problem." });
+        if (imageFiles.length === 0) {
+          toast({ variant: "destructive", title: "No image selected", description: "Please upload at least one image of the problem." });
           return;
         }
         try {
-          const dataUri = await fileToDataUri(imageFile);
-          result = await generateSolution({ problemImage: dataUri });
+          const dataUris = await filesToDataUris(imageFiles);
+          result = await generateSolution({ problemImages: dataUris });
         } catch (error) {
-          toast({ variant: "destructive", title: "Error processing image", description: "Could not prepare the image for the AI." });
+          toast({ variant: "destructive", title: "Error processing images", description: "Could not prepare the images for the AI." });
           return;
         }
       } else {
@@ -109,18 +136,36 @@ export function ProblemForm() {
                   <Label
                     htmlFor="image-upload"
                     className={cn(
-                      "relative flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted transition-colors",
-                      imagePreview && "border-solid"
+                      "relative flex flex-col items-center justify-center w-full min-h-[12rem] border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted transition-colors",
+                      imagePreviews.length > 0 && "border-solid p-4"
                     )}
                   >
-                    {imagePreview ? (
-                      <Image
-                        src={imagePreview}
-                        alt="Problem preview"
-                        layout="fill"
-                        objectFit="contain"
-                        className="rounded-lg p-2"
-                      />
+                    {imagePreviews.length > 0 ? (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                        {imagePreviews.map((src, index) => (
+                          <div key={index} className="relative group">
+                            <Image
+                              src={src}
+                              alt={`Problem preview ${index + 1}`}
+                              width={150}
+                              height={150}
+                              className="rounded-lg object-cover aspect-square"
+                            />
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                e.preventDefault();
+                                removeImage(index);
+                              }}
+                              className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                              aria-label="Remove image"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
                     ) : (
                       <div className="flex flex-col items-center justify-center pt-5 pb-6">
                         <Camera className="w-8 h-8 mb-2 text-muted-foreground" />
@@ -131,7 +176,7 @@ export function ProblemForm() {
                       </div>
                     )}
                   </Label>
-                  <Input id="image-upload" type="file" className="hidden" accept="image/png, image/jpeg, image/webp" onChange={handleFileChange} />
+                  <Input ref={inputRef} id="image-upload" type="file" className="hidden" accept="image/png, image/jpeg, image/webp" onChange={handleFileChange} multiple />
                 </div>
               </TabsContent>
               <TabsContent value="type" className="m-0">
