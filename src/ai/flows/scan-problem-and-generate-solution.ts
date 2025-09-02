@@ -32,7 +32,9 @@ const prompt = ai.definePrompt({
   name: 'scanProblemAndGenerateSolutionPrompt',
   input: {schema: ScanProblemAndGenerateSolutionInputSchema},
   output: {schema: ScanProblemAndGenerateSolutionOutputSchema},
-  prompt: `You are an expert math and science tutor. A student will provide you with a problem, either as text or one or more images. Your response must be in Portuguese, unless the question is about the subject of English. Extract the problem and provide a detailed, step-by-step solution that the student can easily understand.
+  prompt: `You are an expert math and science tutor. A student will provide you with one or more problems, either as text or in one or more images. Your response must be in Portuguese, unless the question is about the subject of English.
+
+Your task is to identify every single problem presented and provide a detailed, step-by-step solution for each one. Ensure you solve all problems you find.
 
 If multiple images are provided, they may represent different parts of the same problem. Please piece them together to form the complete problem before solving.
 
