@@ -34,7 +34,7 @@ const prompt = ai.definePrompt({
   name: 'scanProblemAndGenerateSolutionPrompt',
   input: {schema: ScanProblemAndGenerateSolutionInputSchema},
   output: {schema: ScanProblemAndGenerateSolutionOutputSchema},
-  prompt: `You are an expert math and science tutor. A student will provide you with a problem, either as text or an image. Extract the problem and provide a detailed, step-by-step solution that the student can easily understand.
+  prompt: `You are an expert math and science tutor. A student will provide you with a problem, either as text or an image. Your response must be in Portuguese, unless the question is about the subject of English. Extract the problem and provide a detailed, step-by-step solution that the student can easily understand.
 
 {{#if problemText}}
 Problem Text:
