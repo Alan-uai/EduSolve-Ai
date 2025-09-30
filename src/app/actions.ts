@@ -36,15 +36,13 @@ export async function generateSolution(
 }
 
 export async function generateChatResponse(
-  history: ChatMessage[],
-  prompt: string,
-  images: string[]
+  history: ChatMessage[]
 ): Promise<ChatState> {
   try {
-    if (images.length === 0 && !prompt) {
-      return { error: 'Nenhum prompt ou imagem fornecida. Por favor, insira uma mensagem ou envie uma imagem.' };
+    if (history.length === 0) {
+      return { error: 'Nenhum histórico de chat fornecido.' };
     }
-    const result = await generateChatResponseFlow(history, prompt, images);
+    const result = await generateChatResponseFlow(history);
     if (!result) {
       return { error: 'A IA não conseguiu gerar uma resposta. Por favor, tente novamente.' };
     }

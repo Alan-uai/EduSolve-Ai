@@ -222,7 +222,7 @@ export function ProblemForm() {
 
     startChatting(async () => {
       try {
-        const result = await generateChatResponse(newHistory, currentPrompt, currentImages);
+        const result = await generateChatResponse(newHistory);
         
         if (result.error) {
           toast({ variant: "destructive", title: "Erro da IA", description: result.error });

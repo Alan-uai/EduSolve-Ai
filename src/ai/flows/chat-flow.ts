@@ -32,8 +32,7 @@ export type ChatMessage = z.infer<typeof ChatMessageSchema>;
 
 const ChatFlowInputSchema = z.object({
   history: z.array(ChatMessageSchema),
-  prompt: z.string(),
-  images: z.array(z.string()).optional(),
+  // The prompt and images are part of the last message in history, so we don't need them as separate inputs.
 });
 
 const ChatFlowOutputSchema = z.string();
@@ -41,10 +40,8 @@ const ChatFlowOutputSchema = z.string();
 
 export async function generateChatResponse(
   history: ChatMessage[],
-  prompt: string,
-  images?: string[]
 ): Promise<string> {
-  return chatFlow({ history, prompt, images });
+  return chatFlow({ history });
 }
 
 const chatFlow = ai.defineFlow(
@@ -53,24 +50,11 @@ const chatFlow = ai.defineFlow(
     inputSchema: ChatFlowInputSchema,
     outputSchema: ChatFlowOutputSchema,
   },
-  async ({ history, prompt, images }) => {
-
-    const userContent = [] as any[];
-    userContent.push({ text: prompt });
-    if (images) {
-      images.forEach(url => {
-        userContent.push({ media: { url } });
-      });
-    }
-
-    const newHistory = [...history]
-    // The new user message is already added to the history in the client,
-    // so we don't need to add it again here. The `prompt` and `images` are just
-    // for context, but the full history is the source of truth.
+  async ({ history }) => {
 
     const response = await ai.generate({
       model: 'googleai/gemini-2.5-flash',
-      history: newHistory,
+      history: history,
       prompt: `You are an expert math and science tutor. A student will provide you with one or more problems, either as text or in one or more images. Your response must be in Portuguese, unless the question is about the subject of English.
 
 Your task is to identify every single problem presented and provide a detailed, step-by-step solution for each one. Ensure you solve all problems you find.
