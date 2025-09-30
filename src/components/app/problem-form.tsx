@@ -201,8 +201,11 @@ export function ProblemForm() {
     const currentImagePreviews = chatImagePreviews;
     const userMessageContent: any[] = [{ text: currentUserPrompt }];
     currentImagePreviews.forEach(url => userMessageContent.push({ media: { url } }));
+
+    const newUserMessage: ChatMessage = { role: 'user', content: userMessageContent };
+    const newHistory = [...chatHistory, newUserMessage];
     
-    setChatHistory(prev => [...prev, { role: 'user', content: userMessageContent }]);
+    setChatHistory(newHistory);
     setChatPrompt("");
     setChatImageFiles([]);
     setChatImagePreviews([]);
@@ -210,7 +213,7 @@ export function ProblemForm() {
     startChatting(async () => {
       try {
         // We use the previews (data URIs) directly for the AI call.
-        const result = await generateChatResponse(chatHistory, currentUserPrompt, currentImagePreviews);
+        const result = await generateChatResponse(newHistory, currentUserPrompt, currentImagePreviews);
         
         if (result.error) {
           toast({ variant: "destructive", title: "Erro da IA", description: result.error });

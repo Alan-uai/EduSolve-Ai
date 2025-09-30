@@ -1,8 +1,9 @@
+
 'use server';
 /**
  * @fileOverview This file defines a Genkit flow for a multi-turn chat conversation.
  *
- * - generateChatResponse - The main function to continue a chat conversation.
+ * - generateChatResponse - The main function to continue a a chat conversation.
  * - ChatMessage - The type for a single message in the chat history.
  */
 
@@ -62,7 +63,10 @@ const chatFlow = ai.defineFlow(
       });
     }
 
-    const newHistory = [...history, { role: 'user', content: userContent }]
+    const newHistory = [...history]
+    // The new user message is already added to the history in the client,
+    // so we don't need to add it again here. The `prompt` and `images` are just
+    // for context, but the full history is the source of truth.
 
     const response = await ai.generate({
       model: 'googleai/gemini-2.5-flash',
