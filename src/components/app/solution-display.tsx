@@ -4,6 +4,7 @@ import { AlertCircle, CheckCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { markdownToHtml } from "@/lib/utils";
 
 interface SolutionDisplayProps {
   isLoading: boolean;
@@ -47,6 +48,8 @@ export function SolutionDisplay({ isLoading, solution, error }: SolutionDisplayP
      )
   }
 
+  const solutionHtml = markdownToHtml(solution);
+
   return (
     <Card className="w-full animate-in fade-in-50 duration-500">
       <CardHeader>
@@ -56,9 +59,10 @@ export function SolutionDisplay({ isLoading, solution, error }: SolutionDisplayP
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="prose prose-sm max-w-none text-foreground whitespace-pre-wrap font-body">
-            {solution}
-        </div>
+        <div 
+            className="prose prose-sm max-w-none text-foreground whitespace-pre-wrap font-body"
+            dangerouslySetInnerHTML={{ __html: solutionHtml }}
+        />
       </CardContent>
     </Card>
   );
