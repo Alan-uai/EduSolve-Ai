@@ -199,29 +199,30 @@ export function ProblemForm() {
     });
   };
 
-  const handleChatSubmit = async () => {
-    if (chatImagePreviews.length === 0 && !chatPrompt.trim()) {
+  const handleChatSubmit = (prompt: string, images?: string[]) => {
+    const currentPrompt = prompt || chatPrompt;
+    const currentImages = images || chatImagePreviews;
+
+    if (currentImages.length === 0 && !currentPrompt.trim()) {
       toast({ variant: "destructive", title: "Mensagem vazia", description: "Por favor, insira uma mensagem ou envie uma imagem." });
       return;
     }
 
-    const currentUserPrompt = chatPrompt;
-    const currentImagePreviews = chatImagePreviews;
-    const userMessageContent: any[] = [{ text: currentUserPrompt }];
-    currentImagePreviews.forEach(url => userMessageContent.push({ media: { url } }));
+    const userMessageContent: any[] = [{ text: currentPrompt }];
+    currentImages.forEach(url => userMessageContent.push({ media: { url } }));
 
     const newUserMessage: ChatMessage = { role: 'user', content: userMessageContent };
     const newHistory = [...chatHistory, newUserMessage];
     
     setChatHistory(newHistory);
-    setChatPrompt("");
+    // Clear the main chat input, but not the prompt that might come from solution display
+    setChatPrompt(""); 
     setChatImageFiles([]);
     setChatImagePreviews([]);
 
     startChatting(async () => {
       try {
-        // We use the previews (data URIs) directly for the AI call.
-        const result = await generateChatResponse(newHistory, currentUserPrompt, currentImagePreviews);
+        const result = await generateChatResponse(newHistory, currentPrompt, currentImages);
         
         if (result.error) {
           toast({ variant: "destructive", title: "Erro da IA", description: result.error });
@@ -241,10 +242,15 @@ export function ProblemForm() {
     });
   };
 
+  const handleFollowUpQuestion = (question: string) => {
+    setActiveTab("chat");
+    handleChatSubmit(question);
+  }
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (activeTab === "chat") {
-      handleChatSubmit();
+      handleChatSubmit(chatPrompt, chatImagePreviews);
     } else {
       handleSolveSubmit();
     }
@@ -425,8 +431,11 @@ export function ProblemForm() {
           isLoading={isSolving}
           solution={solveState.solution}
           error={solveState.error}
+          onFollowUp={handleFollowUpQuestion}
         />
       )}
     </div>
   );
 }
+
+    
