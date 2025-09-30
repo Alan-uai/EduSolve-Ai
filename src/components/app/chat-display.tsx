@@ -1,12 +1,13 @@
 
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { markdownToHtml } from "@/lib/utils";
 import type { ChatMessage } from "@/ai/flows/chat-flow";
-import { Bot, User, Image as ImageIcon, MessageSquare } from "lucide-react";
+import { Bot, User, MessageSquare } from "lucide-react";
 import Image from "next/image";
+import { useEffect, useRef } from "react";
 
 interface ChatDisplayProps {
   history: ChatMessage[];
@@ -48,8 +49,17 @@ function ChatMessageContent({ message }: { message: ChatMessage }) {
 }
 
 export function ChatDisplay({ history, isLoading }: ChatDisplayProps) {
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+    }
+  }, [history, isLoading]);
+
+
   return (
-    <div className="flex-1 space-y-4 overflow-y-auto pr-4">
+    <div ref={scrollAreaRef} className="flex-1 space-y-4 overflow-y-auto pr-4">
       {history.length === 0 && !isLoading && (
         <div className="text-center text-muted-foreground py-10">
           <MessageSquare className="mx-auto h-12 w-12" />

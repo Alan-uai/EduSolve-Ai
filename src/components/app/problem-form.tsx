@@ -3,7 +3,7 @@
 
 import { useState, useTransition, useRef, useEffect } from "react";
 import Image from "next/image";
-import { Camera, Type, MessageSquare, LoaderCircle, WandSparkles, X, Paperclip, Send } from "lucide-react";
+import { Camera, Type, MessageSquare, LoaderCircle, WandSparkles, X, Paperclip, Send, Trash2 } from "lucide-react";
 import { generateSolution, generateChatResponse } from "@/app/actions";
 import { cn } from "@/lib/utils";
 import type { ChatMessage } from "@/ai/flows/chat-flow";
@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 const LOCAL_STORAGE_KEY = 'castanha-state';
 
@@ -148,6 +149,17 @@ export function ProblemForm() {
     if (chatInputRef.current) {
       chatInputRef.current.value = "";
     }
+  }
+
+  const handleNewChat = () => {
+    setChatHistory([]);
+    setChatPrompt("");
+    setChatImageFiles([]);
+    setChatImagePreviews([]);
+    toast({
+      title: "Novo Chat Criado",
+      description: "Seu histórico de chat anterior foi limpo.",
+    });
   }
 
 
@@ -330,7 +342,32 @@ export function ProblemForm() {
             <Card>
               <CardContent className="p-6">
                 <div className="flex flex-col h-[60vh]">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-semibold">Chat com IA</h3>
+                     <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                           <Button variant="outline" size="sm" disabled={chatHistory.length === 0}>
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Novo Chat
+                           </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                           <AlertDialogHeader>
+                              <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                 Esta ação não pode ser desfeita. Isso limpará permanentemente seu histórico de bate-papo atual.
+                              </AlertDialogDescription>
+                           </AlertDialogHeader>
+                           <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction onClick={handleNewChat}>Continuar</AlertDialogAction>
+                           </AlertDialogFooter>
+                        </AlertDialogContent>
+                     </AlertDialog>
+                  </div>
+
                   <ChatDisplay history={chatHistory} isLoading={isChatting} />
+                  
                   <div className="mt-4 border-t pt-4">
                     {chatImagePreviews.length > 0 && (
                         <div className="mb-2 grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
