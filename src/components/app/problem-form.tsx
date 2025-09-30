@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState, useTransition, useRef } from "react";
+import { useState, useTransition, useRef, useEffect } from "react";
 import Image from "next/image";
 import { Camera, Type, MessageSquare, LoaderCircle, WandSparkles, X, Paperclip, Send } from "lucide-react";
 import { generateSolution, generateChatResponse } from "@/app/actions";
@@ -16,34 +17,74 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 
+const LOCAL_STORAGE_KEY = 'castanha-state';
 
-type SolveState = {
-  solution?: string;
-  error?: string;
+type AppState = {
+  activeTab: string;
+  solveState: { solution?: string; error?: string };
+  imagePreviews: string[];
+  problemText: string;
+  chatHistory: ChatMessage[];
 };
-
-type ChatState = {
-  response?: string;
-  error?: string;
-}
 
 export function ProblemForm() {
   const { toast } = useToast();
   const [isSolving, startSolving] = useTransition();
   const [isChatting, startChatting] = useTransition();
-  const [solveState, setSolveState] = useState<SolveState>({});
-  const [activeTab, setActiveTab] = useState("scan");
-
-  // State for problem solving tabs
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
-  const [imageFiles, setImageFiles] = useState<File[]>([]);
-  const [problemText, setProblemText] = useState("");
   
-  // State for chat tab
-  const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
+  const [appState, setAppState] = useState<AppState>({
+    activeTab: "scan",
+    solveState: {},
+    imagePreviews: [],
+    problemText: "",
+    chatHistory: [],
+  });
+
+  // Derived state for easier access
+  const { activeTab, solveState, imagePreviews, problemText, chatHistory } = appState;
+  
+  const setActiveTab = (tab: string) => setAppState(prev => ({ ...prev, activeTab: tab }));
+  const setSolveState = (state: { solution?: string; error?: string }) => setAppState(prev => ({ ...prev, solveState: state }));
+  const setImagePreviews = (previews: string[] | ((prev: string[]) => string[])) => setAppState(prev => ({ ...prev, imagePreviews: typeof previews === 'function' ? previews(prev.imagePreviews) : previews }));
+  const setProblemText = (text: string) => setAppState(prev => ({ ...prev, problemText: text }));
+  const setChatHistory = (history: ChatMessage[] | ((prev: ChatMessage[]) => ChatMessage[])) => setAppState(prev => ({ ...prev, chatHistory: typeof history === 'function' ? history(prev.chatHistory) : history }));
+
+
+  // State for things that shouldn't be persisted
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [chatPrompt, setChatPrompt] = useState("");
   const [chatImageFiles, setChatImageFiles] = useState<File[]>([]);
   const [chatImagePreviews, setChatImagePreviews] = useState<string[]>([]);
+  
+
+  // Load state from localStorage on mount
+  useEffect(() => {
+    try {
+      const savedState = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (savedState) {
+        const parsedState = JSON.parse(savedState);
+        setAppState(parsedState);
+        // Re-create File objects from data URIs if needed for re-submission, but for now just previews are restored.
+      }
+    } catch (error) {
+      console.error("Failed to load state from localStorage", error);
+    }
+  }, []);
+
+  // Save state to localStorage on change
+  useEffect(() => {
+    try {
+      // Don't save if initial state is still loading
+      if(appState.activeTab === 'scan' && appState.imagePreviews.length === 0 && appState.problemText === '' && appState.chatHistory.length === 0) {
+        // This is a rough check for initial state, could be improved.
+      } else {
+        const stateToSave = JSON.stringify(appState);
+        localStorage.setItem(LOCAL_STORAGE_KEY, stateToSave);
+      }
+    } catch (error) {
+      console.error("Failed to save state to localStorage", error);
+    }
+  }, [appState]);
 
 
   const formRef = useRef<HTMLFormElement>(null);
@@ -56,13 +97,14 @@ export function ProblemForm() {
       const newFiles = [...imageFiles, ...files];
       setImageFiles(newFiles);
 
-      const newPreviews = [...imagePreviews];
+      const newPreviews: string[] = [];
       files.forEach(file => {
         const reader = new FileReader();
         reader.onloadend = () => {
           newPreviews.push(reader.result as string);
-          // Update previews after each file is read
-          setImagePreviews([...newPreviews]);
+          if (newPreviews.length === files.length) {
+            setImagePreviews(prev => [...prev, ...newPreviews]);
+          }
         };
         reader.readAsDataURL(file);
       });
@@ -75,12 +117,14 @@ export function ProblemForm() {
       const newFiles = [...chatImageFiles, ...files];
       setChatImageFiles(newFiles);
 
-      const newPreviews = [...chatImagePreviews];
+      const newPreviews: string[] = [];
       files.forEach(file => {
         const reader = new FileReader();
         reader.onloadend = () => {
           newPreviews.push(reader.result as string);
-          setChatImagePreviews([...newPreviews]);
+          if (newPreviews.length === files.length) {
+            setChatImagePreviews(prev => [...prev, ...newPreviews]);
+          }
         };
         reader.readAsDataURL(file);
       });
@@ -88,13 +132,9 @@ export function ProblemForm() {
   };
   
   const removeImage = (index: number) => {
-    const newFiles = [...imageFiles];
-    newFiles.splice(index, 1);
-    setImageFiles(newFiles);
-
-    const newPreviews = [...imagePreviews];
-    newPreviews.splice(index, 1);
-    setImagePreviews(newPreviews);
+    setImagePreviews(prev => prev.filter((_, i) => i !== index));
+    // Also remove the corresponding file if you are tracking them separately
+    setImageFiles(prev => prev.filter((_, i) => i !== index));
 
     if (inputRef.current) {
       inputRef.current.value = "";
@@ -102,14 +142,9 @@ export function ProblemForm() {
   };
 
   const removeChatImage = (index: number) => {
-    const newFiles = [...chatImageFiles];
-    newFiles.splice(index, 1);
-    setChatImageFiles(newFiles);
-
-    const newPreviews = [...chatImagePreviews];
-    newPreviews.splice(index, 1);
-    setChatImagePreviews(newPreviews);
-
+    setChatImagePreviews(prev => prev.filter((_, i) => i !== index));
+    setChatImageFiles(prev => prev.filter((_, i) => i !== index));
+    
     if (chatInputRef.current) {
       chatInputRef.current.value = "";
     }
@@ -134,18 +169,14 @@ export function ProblemForm() {
     startSolving(async () => {
       let result;
       if (activeTab === "scan") {
-        if (imageFiles.length === 0) {
+        if (imagePreviews.length === 0) {
           toast({ variant: "destructive", title: "No image selected", description: "Please upload at least one image of the problem." });
           return;
         }
-        try {
-          const dataUris = await filesToDataUris(imageFiles);
-          result = await generateSolution({ problemImages: dataUris });
-        } catch (error) {
-          toast({ variant: "destructive", title: "Error processing images", description: "Could not prepare the images for the AI." });
-          return;
-        }
-      } else {
+        // Using previews directly as they are data URIs
+        result = await generateSolution({ problemImages: imagePreviews });
+
+      } else { // "type" tab
         if (!problemText.trim()) {
           toast({ variant: "destructive", title: "No text entered", description: "Please type the problem in the text area." });
           return;
@@ -161,7 +192,7 @@ export function ProblemForm() {
   };
 
   const handleChatSubmit = async () => {
-    if (chatImageFiles.length === 0 && !chatPrompt.trim()) {
+    if (chatImagePreviews.length === 0 && !chatPrompt.trim()) {
       toast({ variant: "destructive", title: "Empty message", description: "Please enter a message or upload an image." });
       return;
     }
@@ -178,8 +209,8 @@ export function ProblemForm() {
 
     startChatting(async () => {
       try {
-        const dataUris = await filesToDataUris(chatImageFiles);
-        const result = await generateChatResponse(chatHistory, currentUserPrompt, dataUris);
+        // We use the previews (data URIs) directly for the AI call.
+        const result = await generateChatResponse(chatHistory, currentUserPrompt, currentImagePreviews);
         
         if (result.error) {
           toast({ variant: "destructive", title: "AI Error", description: result.error });
@@ -212,7 +243,7 @@ export function ProblemForm() {
 
   return (
     <div className="flex flex-col gap-8">
-      <Tabs defaultValue="scan" className="w-full" onValueChange={setActiveTab}>
+      <Tabs value={activeTab} className="w-full" onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="scan">
             <Camera className="mr-2 h-4 w-4" /> Scan
@@ -355,3 +386,5 @@ export function ProblemForm() {
     </div>
   );
 }
+
+    

@@ -1,10 +1,11 @@
+
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { markdownToHtml } from "@/lib/utils";
 import type { ChatMessage } from "@/ai/flows/chat-flow";
-import { Bot, User, Image as ImageIcon } from "lucide-react";
+import { Bot, User, Image as ImageIcon, MessageSquare } from "lucide-react";
 import Image from "next/image";
 
 interface ChatDisplayProps {
@@ -24,8 +25,8 @@ function ChatMessageContent({ message }: { message: ChatMessage }) {
        )}
       <div className={`flex flex-col gap-2 rounded-lg px-3 py-2 text-sm max-w-[85%] ${isModel ? 'bg-muted' : 'bg-primary text-primary-foreground'}`}>
         {message.content.map((part, index) => {
-           if ('text' in part) {
-             return <div key={index} className="prose prose-sm max-w-none text-foreground whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: markdownToHtml(part.text) }} />
+           if ('text' in part && part.text) {
+             return <div key={index} className="prose prose-sm max-w-none text-current whitespace-pre-wrap" dangerouslySetInnerHTML={{ __html: markdownToHtml(part.text) }} />
            }
            if ('media' in part) {
             return (
@@ -76,3 +77,5 @@ export function ChatDisplay({ history, isLoading }: ChatDisplayProps) {
     </div>
   );
 }
+
+    
