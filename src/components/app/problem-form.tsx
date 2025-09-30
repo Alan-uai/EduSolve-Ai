@@ -142,6 +142,15 @@ export function ProblemForm() {
     }
   };
 
+  const handleClearAllImages = () => {
+    setImagePreviews([]);
+    setImageFiles([]);
+    if (inputRef.current) {
+      inputRef.current.value = "";
+    }
+  };
+
+
   const removeChatImage = (index: number) => {
     setChatImagePreviews(prev => prev.filter((_, i) => i !== index));
     setChatImageFiles(prev => prev.filter((_, i) => i !== index));
@@ -161,19 +170,6 @@ export function ProblemForm() {
       description: "Seu histórico de chat anterior foi limpo.",
     });
   }
-
-
-  const filesToDataUris = (files: File[]): Promise<string[]> => {
-    const promises = files.map(file => {
-      return new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-    });
-    return Promise.all(promises);
-  };
 
   const handleSolveSubmit = async () => {
     setSolveState({}); 
@@ -274,8 +270,8 @@ export function ProblemForm() {
         <form ref={formRef} onSubmit={handleSubmit}>
           <TabsContent value="scan" className="m-0">
             <Card>
-              <CardContent className="p-6 flex flex-col gap-6">
-                <div className="flex flex-col items-center justify-center gap-4 text-center">
+              <CardContent className="p-6 flex flex-col gap-4">
+                <div className="space-y-2">
                     <Label
                       htmlFor="image-upload"
                       className={cn(
@@ -315,6 +311,14 @@ export function ProblemForm() {
                     </Label>
                     <Input ref={inputRef} id="image-upload" type="file" className="hidden" accept="image/png, image/jpeg, image/webp" onChange={handleFileChange} multiple />
                   </div>
+                  {imagePreviews.length > 0 && (
+                    <div className="flex justify-end">
+                      <Button variant="outline" size="sm" onClick={handleClearAllImages}>
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        Limpar Imagens
+                      </Button>
+                    </div>
+                  )}
                   <Button type="submit" disabled={isSolving} className="w-full font-bold text-lg py-6">
                     {isSolving ? <><LoaderCircle className="mr-2 h-5 w-5 animate-spin" /> Resolvendo...</>
                                : <><WandSparkles className="mr-2 h-5 w-5" /> Gerar Solução</>}
