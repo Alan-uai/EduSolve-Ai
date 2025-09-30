@@ -33,7 +33,7 @@ export function SolutionDisplay({ isLoading, solution, error }: SolutionDisplayP
     return (
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Error</AlertTitle>
+        <AlertTitle>Erro</AlertTitle>
         <AlertDescription>{error}</AlertDescription>
       </Alert>
     );
@@ -42,8 +42,8 @@ export function SolutionDisplay({ isLoading, solution, error }: SolutionDisplayP
   if (!solution) {
      return (
         <div className="text-center py-10 px-4 border-2 border-dashed rounded-lg">
-            <h3 className="text-lg font-medium text-muted-foreground">Your step-by-step solution will appear here.</h3>
-            <p className="text-sm text-muted-foreground/80 mt-1">Scan or type a problem above to get started.</p>
+            <h3 className="text-lg font-medium text-muted-foreground">Sua solução passo a passo aparecerá aqui.</h3>
+            <p className="text-sm text-muted-foreground/80 mt-1">Escaneie ou digite um problema acima para começar.</p>
         </div>
      )
   }
@@ -55,7 +55,7 @@ export function SolutionDisplay({ isLoading, solution, error }: SolutionDisplayP
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <CheckCircle className="h-6 w-6 text-accent-foreground" />
-          Solution
+          Solução
         </CardTitle>
       </CardHeader>
       <CardContent>

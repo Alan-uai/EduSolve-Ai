@@ -20,18 +20,18 @@ export async function generateSolution(
 ): Promise<SolveState> {
   try {
     if ((!input.problemImages || input.problemImages.length === 0) && !input.problemText) {
-      return { error: 'No problem provided. Please upload an image or type the problem text.' };
+      return { error: 'Nenhum problema fornecido. Por favor, envie uma imagem ou digite o texto do problema.' };
     }
 
     const result = await scanProblemAndGenerateSolution(input);
     if (!result.solution) {
-      return { error: 'The AI could not generate a solution. Please try again.' };
+      return { error: 'A IA não conseguiu gerar uma solução. Por favor, tente novamente.' };
     }
     return { solution: result.solution };
   } catch (e) {
     console.error(e);
-    const errorMessage = e instanceof Error ? e.message : 'An unknown error occurred.';
-    return { error: `Failed to generate solution: ${errorMessage}` };
+    const errorMessage = e instanceof Error ? e.message : 'Ocorreu um erro desconhecido.';
+    return { error: `Falha ao gerar solução: ${errorMessage}` };
   }
 }
 
@@ -42,16 +42,16 @@ export async function generateChatResponse(
 ): Promise<ChatState> {
   try {
     if (images.length === 0 && !prompt) {
-      return { error: 'No prompt or image provided. Please enter a message or upload an image.' };
+      return { error: 'Nenhum prompt ou imagem fornecida. Por favor, insira uma mensagem ou envie uma imagem.' };
     }
     const result = await generateChatResponseFlow(history, prompt, images);
     if (!result) {
-      return { error: 'The AI could not generate a response. Please try again.' };
+      return { error: 'A IA não conseguiu gerar uma resposta. Por favor, tente novamente.' };
     }
     return { response: result };
   } catch (e) {
     console.error(e);
-    const errorMessage = e instanceof Error ? e.message : 'An unknown error occurred.';
-    return { error: `Failed to generate response: ${errorMessage}` };
+    const errorMessage = e instanceof Error ? e.message : 'Ocorreu um erro desconhecido.';
+    return { error: `Falha ao gerar resposta: ${errorMessage}` };
   }
 }

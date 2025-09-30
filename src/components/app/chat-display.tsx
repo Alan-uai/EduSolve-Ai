@@ -53,8 +53,8 @@ export function ChatDisplay({ history, isLoading }: ChatDisplayProps) {
       {history.length === 0 && !isLoading && (
         <div className="text-center text-muted-foreground py-10">
           <MessageSquare className="mx-auto h-12 w-12" />
-          <h3 className="mt-2 text-lg font-medium">Start a conversation</h3>
-          <p className="mt-1 text-sm">Ask me anything about your homework, or upload an image of a problem.</p>
+          <h3 className="mt-2 text-lg font-medium">Inicie uma conversa</h3>
+          <p className="mt-1 text-sm">Pergunte-me qualquer coisa sobre sua lição de casa ou envie a imagem de um problema.</p>
         </div>
       )}
 
@@ -77,5 +77,3 @@ export function ChatDisplay({ history, isLoading }: ChatDisplayProps) {
     </div>
   );
 }
-
-    

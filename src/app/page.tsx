@@ -13,14 +13,14 @@ export default function Home() {
             </h1>
           </div>
           <p className="text-muted-foreground mt-3 text-lg">
-            Your AI-powered homework helper for math and science.
+            Seu assistente de lição de casa para matemática e ciências.
           </p>
         </header>
         
         <ProblemForm />
 
         <footer className="text-center mt-12 text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Castanha. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Castanha. Todos os direitos reservados.</p>
         </footer>
       </div>
     </main>

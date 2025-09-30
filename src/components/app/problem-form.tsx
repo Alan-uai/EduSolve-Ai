@@ -170,7 +170,7 @@ export function ProblemForm() {
       let result;
       if (activeTab === "scan") {
         if (imagePreviews.length === 0) {
-          toast({ variant: "destructive", title: "No image selected", description: "Please upload at least one image of the problem." });
+          toast({ variant: "destructive", title: "Nenhuma imagem selecionada", description: "Por favor, envie pelo menos uma imagem do problema." });
           return;
         }
         // Using previews directly as they are data URIs
@@ -178,14 +178,14 @@ export function ProblemForm() {
 
       } else { // "type" tab
         if (!problemText.trim()) {
-          toast({ variant: "destructive", title: "No text entered", description: "Please type the problem in the text area." });
+          toast({ variant: "destructive", title: "Nenhum texto inserido", description: "Por favor, digite o problema na área de texto." });
           return;
         }
         result = await generateSolution({ problemText: problemText });
       }
 
       if (result.error) {
-        toast({ variant: "destructive", title: "AI Error", description: result.error });
+        toast({ variant: "destructive", title: "Erro da IA", description: result.error });
       }
       setSolveState(result);
     });
@@ -193,7 +193,7 @@ export function ProblemForm() {
 
   const handleChatSubmit = async () => {
     if (chatImagePreviews.length === 0 && !chatPrompt.trim()) {
-      toast({ variant: "destructive", title: "Empty message", description: "Please enter a message or upload an image." });
+      toast({ variant: "destructive", title: "Mensagem vazia", description: "Por favor, insira uma mensagem ou envie uma imagem." });
       return;
     }
 
@@ -213,8 +213,8 @@ export function ProblemForm() {
         const result = await generateChatResponse(chatHistory, currentUserPrompt, currentImagePreviews);
         
         if (result.error) {
-          toast({ variant: "destructive", title: "AI Error", description: result.error });
-          const errorMessage: ChatMessage = { role: 'model', content: [{ text: `Error: ${result.error}` }] };
+          toast({ variant: "destructive", title: "Erro da IA", description: result.error });
+          const errorMessage: ChatMessage = { role: 'model', content: [{ text: `Erro: ${result.error}` }] };
           setChatHistory(prev => [...prev, errorMessage]);
         }
         if (result.response) {
@@ -222,9 +222,9 @@ export function ProblemForm() {
           setChatHistory(prev => [...prev, modelMessage]);
         }
       } catch (error) {
-        const description = error instanceof Error ? error.message : "An unknown error occurred.";
-        toast({ variant: "destructive", title: "Error processing chat", description });
-        const errorMessage: ChatMessage = { role: 'model', content: [{ text: `Error: ${description}` }] };
+        const description = error instanceof Error ? error.message : "Ocorreu um erro desconhecido.";
+        toast({ variant: "destructive", title: "Erro ao processar chat", description });
+        const errorMessage: ChatMessage = { role: 'model', content: [{ text: `Erro: ${description}` }] };
         setChatHistory(prev => [...prev, errorMessage]);
       }
     });
@@ -246,10 +246,10 @@ export function ProblemForm() {
       <Tabs value={activeTab} className="w-full" onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="scan">
-            <Camera className="mr-2 h-4 w-4" /> Scan
+            <Camera className="mr-2 h-4 w-4" /> Escanear
           </TabsTrigger>
           <TabsTrigger value="type">
-            <Type className="mr-2 h-4 w-4" /> Type
+            <Type className="mr-2 h-4 w-4" /> Digitar
           </TabsTrigger>
           <TabsTrigger value="chat">
             <MessageSquare className="mr-2 h-4 w-4" /> Chat
@@ -274,7 +274,7 @@ export function ProblemForm() {
                             <div key={index} className="relative group">
                               <Image
                                 src={src}
-                                alt={`Problem preview ${index + 1}`}
+                                alt={`Prévia do problema ${index + 1}`}
                                 width={150}
                                 height={150}
                                 className="rounded-lg object-cover aspect-square"
@@ -283,7 +283,7 @@ export function ProblemForm() {
                                 type="button"
                                 onClick={(e) => { e.stopPropagation(); e.preventDefault(); removeImage(index); }}
                                 className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                                aria-label="Remove image"
+                                aria-label="Remover imagem"
                               >
                                 <X className="h-3 w-3" />
                               </button>
@@ -293,16 +293,16 @@ export function ProblemForm() {
                       ) : (
                         <div className="flex flex-col items-center justify-center pt-5 pb-6">
                           <Camera className="w-8 h-8 mb-2 text-muted-foreground" />
-                          <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                          <p className="text-xs text-muted-foreground">PNG, JPG, or WEBP</p>
+                          <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Clique para enviar</span> ou arraste e solte</p>
+                          <p className="text-xs text-muted-foreground">PNG, JPG, ou WEBP</p>
                         </div>
                       )}
                     </Label>
                     <Input ref={inputRef} id="image-upload" type="file" className="hidden" accept="image/png, image/jpeg, image/webp" onChange={handleFileChange} multiple />
                   </div>
                   <Button type="submit" disabled={isSolving} className="w-full font-bold text-lg py-6">
-                    {isSolving ? <><LoaderCircle className="mr-2 h-5 w-5 animate-spin" /> Solving...</>
-                               : <><WandSparkles className="mr-2 h-5 w-5" /> Generate Solution</>}
+                    {isSolving ? <><LoaderCircle className="mr-2 h-5 w-5 animate-spin" /> Resolvendo...</>
+                               : <><WandSparkles className="mr-2 h-5 w-5" /> Gerar Solução</>}
                   </Button>
               </CardContent>
             </Card>
@@ -311,14 +311,14 @@ export function ProblemForm() {
              <Card>
               <CardContent className="p-6 flex flex-col gap-6">
                 <Textarea
-                    placeholder="For example: what is 2x + 5 = 15?"
+                    placeholder="Por exemplo: qual é a resposta para 2x + 5 = 15?"
                     className="min-h-[192px] text-base"
                     value={problemText}
                     onChange={(e) => setProblemText(e.target.value)}
                   />
                   <Button type="submit" disabled={isSolving} className="w-full font-bold text-lg py-6">
-                    {isSolving ? <><LoaderCircle className="mr-2 h-5 w-5 animate-spin" /> Solving...</>
-                               : <><WandSparkles className="mr-2 h-5 w-5" /> Generate Solution</>}
+                    {isSolving ? <><LoaderCircle className="mr-2 h-5 w-5 animate-spin" /> Resolvendo...</>
+                               : <><WandSparkles className="mr-2 h-5 w-5" /> Gerar Solução</>}
                   </Button>
               </CardContent>
             </Card>
@@ -333,8 +333,8 @@ export function ProblemForm() {
                         <div className="mb-2 grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
                           {chatImagePreviews.map((src, index) => (
                             <div key={index} className="relative group">
-                              <Image src={src} alt={`Chat preview ${index + 1}`} width={80} height={80} className="rounded-lg object-cover aspect-square"/>
-                              <button type="button" onClick={() => removeChatImage(index)} className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity" aria-label="Remove image">
+                              <Image src={src} alt={`Prévia do chat ${index + 1}`} width={80} height={80} className="rounded-lg object-cover aspect-square"/>
+                              <button type="button" onClick={() => removeChatImage(index)} className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity" aria-label="Remover imagem">
                                 <X className="h-2 w-2" />
                               </button>
                             </div>
@@ -343,7 +343,7 @@ export function ProblemForm() {
                       )}
                     <div className="relative">
                       <Textarea
-                        placeholder="Ask a follow-up question or start a new topic..."
+                        placeholder="Faça uma pergunta ou inicie um novo tópico..."
                         className="pr-24"
                         value={chatPrompt}
                         onChange={(e) => setChatPrompt(e.target.value)}
@@ -358,13 +358,13 @@ export function ProblemForm() {
                         <Button type="button" size="icon" variant="ghost" asChild>
                           <Label htmlFor="chat-image-upload">
                             <Paperclip className="h-5 w-5" />
-                            <span className="sr-only">Attach image</span>
+                            <span className="sr-only">Anexar imagem</span>
                           </Label>
                         </Button>
                         <Input ref={chatInputRef} id="chat-image-upload" type="file" className="hidden" accept="image/png, image/jpeg, image/webp" onChange={handleChatFileChange} multiple />
                         <Button type="submit" size="icon" variant="ghost" disabled={isChatting}>
                           <Send className="h-5 w-5" />
-                          <span className="sr-only">Send</span>
+                          <span className="sr-only">Enviar</span>
                         </Button>
                       </div>
                     </div>
@@ -386,5 +386,3 @@ export function ProblemForm() {
     </div>
   );
 }
-
-    
