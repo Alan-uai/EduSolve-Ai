@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: 'Castanha',
   description: 'Seu solucionador de problemas de IA para educação',
   icons: {
-    icon: '/favicon.ico',
+    icon: '/favicon.png',
   },
 };
 
