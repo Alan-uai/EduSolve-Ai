@@ -1,5 +1,5 @@
 import { ProblemForm } from '@/components/app/problem-form';
-import { BrainCircuit } from 'lucide-react';
+import Image from 'next/image';
 
 export default function Home() {
   return (
@@ -7,7 +7,13 @@ export default function Home() {
       <div className="w-full max-w-2xl mx-auto">
         <header className="text-center mb-10">
           <div className="inline-flex items-center gap-3">
-            <BrainCircuit className="h-10 w-10 text-primary" />
+            <Image
+              src="/icon.svg"
+              alt="Logotipo Castanha"
+              width={40}
+              height={40}
+              className="h-10 w-10"
+            />
             <h1 className="text-4xl md:text-5xl font-bold font-headline text-foreground tracking-tight">
               Castanha
             </h1>
