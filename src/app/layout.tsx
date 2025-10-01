@@ -5,6 +5,9 @@ import { Toaster } from "@/components/ui/toaster"
 export const metadata: Metadata = {
   title: 'Castanha',
   description: 'Seu solucionador de problemas de IA para educação',
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({
