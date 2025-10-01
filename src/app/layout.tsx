@@ -6,7 +6,12 @@ export const metadata: Metadata = {
   title: 'Castanha',
   description: 'Seu solucionador de problemas de IA para educação',
   icons: {
-    icon: '/favicon.png',
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.png', type: 'image/png' },
+    ],
+    shortcut: '/favicon.png',
+    apple: '/favicon-512x512.png',
   },
 };
 
